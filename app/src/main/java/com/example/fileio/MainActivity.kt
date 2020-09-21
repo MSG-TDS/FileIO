@@ -8,8 +8,8 @@ import java.nio.file.Files
 
 class MainActivity : AppCompatActivity() {
 
-    var appPath = ""
-    var fileName = ""
+    private var appPath = ""
+    private var fileName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,54 +19,43 @@ class MainActivity : AppCompatActivity() {
         fileName = "testText.text"
 
         btnRead.setOnClickListener {
-            readFile()
+            val result =  readFile()
+            txtInput.setText(result.toString())
         }
 
         btnWrite.setOnClickListener {
-            writeFile()
+            val content = txtInput.text.toString()
+            writeFile(content)
+            txtInput.text.clear()
         }
     }
 
-    fun writeFile(){
+    private fun writeFile(content : String) {
+
         val dir = File(appPath)
 
-        if(!dir.exists())
-        {
+        // 경로가 없으면 생성
+        if (!dir.exists()) {
             dir.mkdirs()
         }
 
-        val writer = FileWriter("$appPath/$fileName")
-        val buffered = BufferedWriter(writer)
-
-        val txt = txtInput.text.toString()
-
-        buffered.write(txt)
-        txtInput.text.clear()
-
-        buffered.close()
-    }
-
-    fun readFile (){
         val file = File("${this.appPath}/${this.fileName}")
 
-        if(file.exists())
-        {
-            val reader = FileReader(file)
-            val buffered = BufferedReader(reader)
-
-            var temp : String? = ""
-            val result = StringBuffer()
-
-            while(true)
-            {
-                temp = buffered.readLine()
-                if(temp == null) break
-                else result.append(temp)
-            }
-
-            buffered.close()
-
-            txtInput.setText(result.toString())
+        file.bufferedWriter().use{
+            it.write(content)
         }
+    }
+
+    private fun readFile() : String? {
+
+        var result: String? = ""
+
+        val file = File("${this.appPath}/${this.fileName}")
+
+        if (!file.exists()) return ""
+
+        result = file.bufferedReader().readText()
+
+        return result
     }
 }
